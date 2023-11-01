@@ -55,7 +55,6 @@ export default function Weather() {
         maximumAge: 10000,
         timeout: 5000,
       });
-      setLoading(false);
 
       const { latitude, longitude } = location.coords;
 
@@ -76,6 +75,7 @@ export default function Weather() {
         })
         .then((weatherData) => {
           if (weatherData) {
+            setLoading(false);
             dispatch(setWeatherData(weatherData));
           } else {
             Alert.alert("Error", "No weather data found");
