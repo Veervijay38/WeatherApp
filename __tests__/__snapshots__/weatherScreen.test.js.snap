@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Weather Component > renders without errors and matches snapshot 1`] = `
+exports[`Weather Component Weather Component > renders without errors and matches snapshot 1`] = `
 <View
   style={
     {
@@ -62,6 +62,7 @@ exports[`Weather Component > renders without errors and matches snapshot 1`] = `
             ],
           }
         }
+        testID="loading-spinner"
         useNativeDriver={false}
       >
         <RNSVGSvgView

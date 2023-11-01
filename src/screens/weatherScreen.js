@@ -31,31 +31,31 @@ import { setWeatherData } from "../redux/actions";
 const selectLocation = (state) => state.weather.weatherData.location;
 const selectCurrent = (state) => state.weather.weatherData.current;
 
+// Weather function starts here
 export default function Weather() {
   const [showSearch, toggleSearch] = useState(false);
   const [locations, setLocations] = useState([]);
-  const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
 
   const weatherData = useSelector((state) => state.weather.weatherData);
-
   const location = useSelector(selectLocation);
   const current = useSelector(selectCurrent);
+  const dispatch = useDispatch();
 
+  // Function for fetching weather data based on the user's current location
   const getLocation = async () => {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        console.log("Location permission denied");
         setLoading(false);
         return;
       }
-      setLoading(false);
       const location = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.Highest,
         maximumAge: 10000,
         timeout: 5000,
       });
+      setLoading(false);
 
       const { latitude, longitude } = location.coords;
 
@@ -71,22 +71,17 @@ export default function Weather() {
               days: "7",
             });
           } else {
-            console.log("Here6", "Error getting the locations");
             Alert.alert("Error", "Error getting the locations");
           }
         })
         .then((weatherData) => {
-          console.log("Here7", weatherData);
           if (weatherData) {
-            // console.log("Weather data: ", weatherData);
             dispatch(setWeatherData(weatherData));
           } else {
-            console.log("Here8", "No weather data found");
             Alert.alert("Error", "No weather data found");
           }
         })
         .catch((error) => {
-          // console.log("Error fetching weather data: ", error);
           Alert.alert("Error", error);
         })
         .finally(() => {
@@ -104,6 +99,7 @@ export default function Weather() {
     }, [])
   );
 
+  // Function for fetching the location via input field
   const handleSearch = (search) => {
     if (search && search.length > 2)
       fetchLocations({ cityName: search }).then((data) => {
@@ -111,6 +107,7 @@ export default function Weather() {
       });
   };
 
+  // Fetching the weather data
   const handleLocation = (loc) => {
     setLoading(true);
     toggleSearch(false);
@@ -126,26 +123,25 @@ export default function Weather() {
 
   const handleTextDebounce = useCallback(debounce(handleSearch, 1200), []);
 
+  // Rendering UI starts here
   return (
     <View style={styles.container}>
       <StatusBar backgroundColor="#083139" barStyle={"default"} />
+      {/* Loader and background image */}
       <ImageBackground
         blurRadius={70}
-        // source={require("../assets/images/strom.jpeg")}
         source={weatherbackground[current?.condition?.text || "other"]}
         resizeMode="cover"
         style={styles.bgImage}
       >
         {loading ? (
-          <View
-            style={{
-              flex: 1,
-              flexDirection: "row",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Progress.CircleSnail thickness={10} size={140} color="#0bb3b2" />
+          <View style={styles.loadingspinner}>
+            <Progress.CircleSnail
+              thickness={10}
+              size={140}
+              color="#0bb3b2"
+              testID="loading-spinner"
+            />
           </View>
         ) : (
           <SafeAreaView style={styles.subcontainer}>
@@ -194,15 +190,10 @@ export default function Weather() {
                           styles.sublocationview,
                           { borderBottomWidth: showborder ? 1 : 0 },
                         ]}
+                        testID="location-item"
                       >
                         <MapPinIcon size="20" color="gray" />
-                        <Text
-                          style={{
-                            fontSize: 17,
-                            color: "black",
-                            marginLeft: 5,
-                          }}
-                        >
+                        <Text style={styles.locationtext}>
                           {loc?.name}, {loc?.country}
                         </Text>
                       </TouchableOpacity>
@@ -213,139 +204,48 @@ export default function Weather() {
             </View>
 
             {/* Forecast View */}
-            <View
-              style={{
-                flex: 1,
-                flexDirection: "column",
-                justifyContent: "space-around",
-                marginLeft: 16,
-                marginRight: 16,
-                marginBottom: 8,
-              }}
-            >
+            <View style={styles.forecastview}>
               {/* Location */}
-              <Text
-                style={{
-                  color: "white",
-                  textAlign: "center",
-                  fontSize: 24,
-                  fontWeight: "bold",
-                }}
-              >
+              <Text style={styles.cityname}>
                 {location?.name},
-                <Text
-                  style={{
-                    fontSize: 18,
-                    fontWeight: "500",
-                    color: "#e2e8f0",
-                  }}
-                >
-                  {location?.country}
-                </Text>
+                <Text style={styles.countryname}>{location?.country}</Text>
               </Text>
               {/* waether icon */}
-              <View style={{ flexDirection: "row", justifyContent: "center" }}>
+              <View style={styles.weathericonview}>
                 <Image
-                  style={{ height: 208, width: 208 }}
+                  style={styles.weatherimage}
                   source={weatherImages[current?.condition?.text || "other"]}
                 />
               </View>
               {/* Temerature */}
               <View style={{ marginTop: 8 }}>
-                <Text
-                  style={{
-                    textAlign: "center",
-                    fontWeight: "bold",
-                    color: "white",
-                    marginLeft: 20,
-                    fontSize: 64,
-                  }}
-                >
-                  {current?.temp_c}&#176;
-                </Text>
-                <Text
-                  style={{
-                    textAlign: "center",
-                    color: "white",
-                    fontSize: 20,
-                    letterSpacing: 1.6,
-                  }}
-                >
+                <Text style={styles.temptext}>{current?.temp_c}&#176;</Text>
+                <Text style={styles.currentcondition}>
                   {current?.condition?.text}
                 </Text>
               </View>
               {/* Other stats */}
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  marginLeft: 16,
-                  marginRight: 16,
-                }}
-              >
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    marginLeft: 8,
-                  }}
-                >
+              <View style={styles.otherstatview}>
+                <View style={styles.subviewstat}>
                   <Image
                     source={require("../assets/icons/wind.png")}
-                    style={{ width: 24, height: 24 }}
+                    style={styles.statimage}
                   />
-                  <Text
-                    style={{
-                      color: "white",
-                      fontWeight: "500",
-                      fontSize: 16,
-                      marginLeft: 5,
-                    }}
-                  >
-                    {current?.wind_kph} km
-                  </Text>
+                  <Text style={styles.stattext}>{current?.wind_kph} km</Text>
                 </View>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    marginLeft: 8,
-                  }}
-                >
+                <View style={styles.subviewstat}>
                   <Image
                     source={require("../assets/icons/drop.png")}
-                    style={{ width: 24, height: 24 }}
+                    style={styles.statimage}
                   />
-                  <Text
-                    style={{
-                      color: "white",
-                      fontWeight: "500",
-                      fontSize: 16,
-                      marginLeft: 5,
-                    }}
-                  >
-                    {current?.humidity} %
-                  </Text>
+                  <Text style={styles.stattext}>{current?.humidity} %</Text>
                 </View>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    marginLeft: 8,
-                  }}
-                >
+                <View style={styles.subviewstat}>
                   <Image
                     source={require("../assets/icons/sunIcon.png")}
-                    style={{ width: 24, height: 24 }}
+                    style={styles.statimage}
                   />
-                  <Text
-                    style={{
-                      color: "white",
-                      fontWeight: "500",
-                      fontSize: 16,
-                      marginLeft: 5,
-                    }}
-                  >
+                  <Text style={styles.stattext}>
                     {weatherData?.forecast?.forecastday[0]?.astro?.sunrise}
                   </Text>
                 </View>
@@ -353,18 +253,9 @@ export default function Weather() {
             </View>
             {/* forecast for next days */}
             <View style={{ marginBottom: 10, marginTop: 5 }}>
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  marginLeft: 20,
-                  marginRight: 20,
-                }}
-              >
+              <View style={styles.forecasttitleview}>
                 <CalendarDaysIcon size="22" color="white" />
-                <Text style={{ color: "white", fontSize: 16, marginLeft: 10 }}>
-                  Daily forecast
-                </Text>
+                <Text style={styles.forecasttitle}>Daily forecast</Text>
               </View>
               <ScrollView
                 horizontal
@@ -377,21 +268,7 @@ export default function Weather() {
                   let dayName = date.toLocaleDateString("en-US", options);
                   dayName = dayName.split(",")[0];
                   return (
-                    <View
-                      key={index}
-                      style={{
-                        backgroundColor: theme.bgWhite(0.15),
-                        flex: 1,
-                        justifyContent: "center",
-                        alignItems: "center",
-                        width: 96,
-                        borderRadius: 20,
-                        paddingTop: 15,
-                        paddingBottom: 15,
-                        marginTop: 20,
-                        marginRight: 16,
-                      }}
-                    >
+                    <View key={index} style={styles.forecastScrollview}>
                       <Image
                         source={
                           weatherImages[item?.day?.condition?.text || "other"]
@@ -418,11 +295,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     position: "relative",
-    // display: "flex",
   },
   bgImage: {
     flex: 1,
     justifyContent: "center",
+  },
+  loadingspinner: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
   },
   subcontainer: {
     flex: 1,
@@ -462,11 +344,87 @@ const styles = StyleSheet.create({
     marginTop: 10,
     borderRadius: 24,
   },
+  locationtext: {
+    fontSize: 17,
+    color: "black",
+    marginLeft: 5,
+  },
   sublocationview: {
     flexDirection: "row",
     padding: 12,
     paddingLeft: 16,
     paddingRight: 16,
     alignItems: "center",
+  },
+  forecastview: {
+    flex: 1,
+    flexDirection: "column",
+    justifyContent: "space-around",
+    marginLeft: 16,
+    marginRight: 16,
+    marginBottom: 8,
+  },
+  cityname: {
+    color: "white",
+    textAlign: "center",
+    fontSize: 24,
+    fontWeight: "bold",
+  },
+  countryname: {
+    fontSize: 18,
+    fontWeight: "500",
+    color: "#e2e8f0",
+  },
+  weathericonview: { flexDirection: "row", justifyContent: "center" },
+  weatherimage: { height: 208, width: 208 },
+  temptext: {
+    textAlign: "center",
+    fontWeight: "bold",
+    color: "white",
+    marginLeft: 20,
+    fontSize: 64,
+  },
+  currentcondition: {
+    textAlign: "center",
+    color: "white",
+    fontSize: 20,
+    letterSpacing: 1.6,
+  },
+  otherstatview: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginLeft: 16,
+    marginRight: 16,
+  },
+  subviewstat: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginLeft: 8,
+  },
+  statimage: { width: 24, height: 24 },
+  stattext: {
+    color: "white",
+    fontWeight: "500",
+    fontSize: 16,
+    marginLeft: 5,
+  },
+  forecasttitleview: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginLeft: 20,
+    marginRight: 20,
+  },
+  forecasttitle: { color: "white", fontSize: 16, marginLeft: 10 },
+  forecastScrollview: {
+    backgroundColor: theme.bgWhite(0.15),
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    width: 96,
+    borderRadius: 20,
+    paddingTop: 15,
+    paddingBottom: 15,
+    marginTop: 20,
+    marginRight: 16,
   },
 });

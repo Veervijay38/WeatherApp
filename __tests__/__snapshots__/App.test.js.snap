@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`AppNavigation Component renders without errors and matches snapshot 1`] = `
+exports[`App Component renders without errors and matches snapshot 1`] = `
 <RNCSafeAreaProvider
   onInsetsChange={[Function]}
   style={
@@ -138,6 +138,7 @@ exports[`AppNavigation Component renders without errors and matches snapshot 1`]
                       ],
                     }
                   }
+                  testID="loading-spinner"
                   useNativeDriver={false}
                 >
                   <RNSVGSvgView
