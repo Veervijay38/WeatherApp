@@ -19,3 +19,22 @@ export const weatherImages = {
     'Mist': require('../assets/images/mist.png'),
     'other': require('../assets/images/moderaterain.png')
 }
+
+export const weatherbackground = {
+    'Partly cloudy': require('../assets/images/cloudy.jpeg'),
+    'Moderate rain': require('../assets/images/strom.jpeg'),
+    'Patchy rain possible': require('../assets/images/strom.jpeg'),
+    'Sunny': require('../assets/images/sunny.jpeg'),
+    'Clear': require('../assets/images/sunny.jpeg'),
+    'Overcast': require('../assets/images/cloudy.jpeg'),
+    'Cloudy': require('../assets/images/cloudy.jpeg'),
+    'Light rain': require('../assets/images/strom.jpeg'),
+    'Moderate rain at times': require('../assets/images/strom.jpeg'),
+    'Heavy rain': require('../assets/images/strom.jpeg'),
+    'Heavy rain at times': require('../assets/images/strom.jpeg'),
+    'Moderate or heavy freezing rain': require('../assets/images/strom.jpeg'),
+    'Moderate or heavy rain shower': require('../assets/images/strom.jpeg'),
+    'Moderate or heavy rain with thunder': require('../assets/images/strom.jpeg'),
+    'Mist': require('../assets/images/strom.jpeg'),
+    'other': require('../assets/images/strom.jpeg')
+}

@@ -10,6 +10,7 @@ import {
   Image,
   SafeAreaView,
   ScrollView,
+  Alert,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import * as Location from "expo-location";
@@ -22,33 +23,34 @@ import {
   fetchLocations,
   fetchWeatherForecast,
   fetchLiveLocations,
-} from "../api/weather";
-import { weatherImages } from "../constants";
+} from "../api/fetchweather";
+import { weatherImages, weatherbackground } from "../constants";
 import { useSelector, useDispatch } from "react-redux";
 import { setWeatherData } from "../redux/actions";
 
-// const image = { uri: "https://legacy.reactjs.org/logo-og.png" };
+const selectLocation = (state) => state.weather.weatherData.location;
+const selectCurrent = (state) => state.weather.weatherData.current;
 
 export default function Weather() {
   const [showSearch, toggleSearch] = useState(false);
   const [locations, setLocations] = useState([]);
-  const weatherData = useSelector((state) => state.weather.weatherData);
-
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
 
+  const weatherData = useSelector((state) => state.weather.weatherData);
+
+  const location = useSelector(selectLocation);
+  const current = useSelector(selectCurrent);
+
   const getLocation = async () => {
-    const { status } = await Location.requestForegroundPermissionsAsync();
-
-    console.log("Location permission", status);
-
-    if (status !== "granted") {
-      console.log("Location permission denied");
-      setLoading(false);
-      return;
-    }
-
     try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        console.log("Location permission denied");
+        setLoading(false);
+        return;
+      }
+      setLoading(false);
       const location = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.Highest,
         maximumAge: 10000,
@@ -69,27 +71,30 @@ export default function Weather() {
               days: "7",
             });
           } else {
-            console.log("No live locations found");
-            return Promise.resolve(null);
+            console.log("Here6", "Error getting the locations");
+            Alert.alert("Error", "Error getting the locations");
           }
         })
         .then((weatherData) => {
+          console.log("Here7", weatherData);
           if (weatherData) {
-            console.log("Weather data: ", weatherData);
+            // console.log("Weather data: ", weatherData);
             dispatch(setWeatherData(weatherData));
           } else {
-            console.log("No weather data found");
+            console.log("Here8", "No weather data found");
+            Alert.alert("Error", "No weather data found");
           }
         })
         .catch((error) => {
-          console.error("Error fetching weather data: ", error);
+          // console.log("Error fetching weather data: ", error);
+          Alert.alert("Error", error);
         })
         .finally(() => {
           setLoading(false);
         });
     } catch (error) {
-      console.error("Error getting location: ", error);
       setLoading(false);
+      Alert.alert("Error", error);
     }
   };
 
@@ -121,14 +126,13 @@ export default function Weather() {
 
   const handleTextDebounce = useCallback(debounce(handleSearch, 1200), []);
 
-  const { location, current } = weatherData;
-
   return (
     <View style={styles.container}>
       <StatusBar backgroundColor="#083139" barStyle={"default"} />
       <ImageBackground
         blurRadius={70}
-        source={require("../assets/images/bg.png")}
+        // source={require("../assets/images/strom.jpeg")}
+        source={weatherbackground[current?.condition?.text || "other"]}
         resizeMode="cover"
         style={styles.bgImage}
       >
@@ -243,7 +247,6 @@ export default function Weather() {
               <View style={{ flexDirection: "row", justifyContent: "center" }}>
                 <Image
                   style={{ height: 208, width: 208 }}
-                  // source={{ uri: "https:" + current?.condition?.icon }}
                   source={weatherImages[current?.condition?.text || "other"]}
                 />
               </View>
