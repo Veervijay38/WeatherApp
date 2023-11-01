@@ -207,7 +207,7 @@ export default function Weather() {
             <View style={styles.forecastview}>
               {/* Location */}
               <Text style={styles.cityname}>
-                {location?.name},
+                {location?.name},{" "}
                 <Text style={styles.countryname}>{location?.country}</Text>
               </Text>
               {/* waether icon */}
